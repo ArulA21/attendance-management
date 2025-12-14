@@ -3,6 +3,7 @@ import User from '../user/userModel.js';
 import { generateAuthToken } from '../utils/authToken.js';
 
 
+// controller for user signup
 export const signup = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -44,4 +45,44 @@ export const signup = async (req, res) => {
         });
     }
         
+}
+
+// controller for user login
+export const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email });
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if(!isPasswordValid) {
+            return res.json({ success: false, message: "Invalid credentials" });
+        }
+
+        const token = generateAuthToken(user._id);
+
+        res.json({
+            success: true,
+            userData: user,
+            token,
+            message: "Login successful",
+        });
+
+    } catch (error) {
+        console.error("Error in login:", error.message);
+        res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+        
+}
+
+// Controller to check if user is authenticated
+export const checkAuth = async (req, res) => {
+    res.json({
+        success: true,
+        user: req.user,
+    });
 }
