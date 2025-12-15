@@ -1,25 +1,32 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const studentSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
-
-    roll_no: {
+    roll: {
       type: Number,
       required: true,
-      unique: true
+    },
+    std: {
+      type: Number,
+      required: true,
     },
 
-    className: {
-      type: Number,
-      required: true
-    }
+    // OWNER OF STUDENT
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-export default mongoose.model('Student', studentSchema);
+// Roll must be unique PER USER (not globally)
+studentSchema.index({ roll: 1, user: 1 }, { unique: true });
+
+export default mongoose.model("Student", studentSchema);

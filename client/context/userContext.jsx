@@ -1,42 +1,51 @@
-import { createContext } from "react";
-import { useState } from "react";
-import axios from "axios";
+import { createContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useEffect } from "react";
-
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
-axios.defaults.baseURL = backendUrl;
+import axios from "../utils/axiosInstance";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [authUser, setAuthUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Check auth on refresh
+  // 🔹 Check auth (safe against race conditions)
   const checkAuth = async () => {
     try {
-        console.log("Hi")
       const { data } = await axios.post("/auth/check");
-      console.log(data, "data")
+
       if (data.success) {
         setAuthUser(data.user);
+      } else {
+        setAuthUser(null);
       }
-    } catch (error) {
+    } catch {
       setAuthUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Login / Signup
-  const login = async (state, credentials) => {
+  // 🔹 Run when token changes
+  useEffect(() => {
+    if (!token) {
+      setAuthUser(null);
+      setLoading(false);
+      return;
+    }
+
+    checkAuth();
+  }, [token]);
+
+  // 🔹 Login / Signup
+  const login = async (endpoint, credentials) => {
     try {
-      const { data } = await axios.post(`/${state}`, credentials);
+      const { data } = await axios.post(`/${endpoint}`, credentials);
 
       if (data.success) {
-        setAuthUser(data.userData);
-        setToken(data.token);
         localStorage.setItem("token", data.token);
-        axios.defaults.headers.common["token"] = data.token;
+        setToken(data.token);
+        setAuthUser(data.userData);
         toast.success(data.message);
       } else {
         toast.error(data.message);
@@ -46,26 +55,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout
+  // 🔹 Logout (HARD RESET)
   const logout = () => {
     localStorage.removeItem("token");
-    setAuthUser(null);
     setToken(null);
-    delete axios.defaults.headers.common["token"];
+    setAuthUser(null);
     toast.success("Logged out successfully");
   };
-
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common["token"] = token;
-      checkAuth();
-    }
-  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         authUser,
+        token,
+        loading,
         login,
         logout,
       }}
@@ -74,20 +77,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import toast from 'react-hot-toast';
+import { StudentContext } from '../../context/studentContext';
+ 
+
 export const AddStudents = () => {
-  const [students, setStudents] = useState([]);
+  const { students, addStudent, editStudent, deleteStudent } =
+    useContext(StudentContext);
+
   const [form, setForm] = useState({
     name: '',
     roll: '',
     className: ''
   });
+
   const [editId, setEditId] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  //add
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -22,36 +29,36 @@ export const AddStudents = () => {
     }
 
     if (editId) {
-      setStudents(
-        students.map((s) =>
-          s.id === editId ? { ...s, ...form } : s
-        )
-      );
-      toast.success('Student updated successfully');
+      editStudent(editId, {
+        name: form.name,
+        roll: Number(form.roll),
+        std: Number(form.className)
+      });
       setEditId(null);
     } else {
-      setStudents([
-        ...students,
-        { id: Date.now(), ...form }
-      ]);
-      toast.success('Student added successfully');
+      addStudent({
+        name: form.name,
+        roll: Number(form.roll),
+        std: Number(form.className)
+      });
     }
 
     setForm({ name: '', roll: '', className: '' });
   };
 
+  // EDIT
   const handleEdit = (student) => {
     setForm({
       name: student.name,
       roll: student.roll,
-      className: student.className
+      className: student.std
     });
-    setEditId(student.id);
+    setEditId(student._id);
   };
 
+  // DELETE
   const handleDelete = (id) => {
-    setStudents(students.filter((s) => s.id !== id));
-    toast.info('Student deleted');
+    deleteStudent(id);
   };
 
   return (
@@ -123,10 +130,10 @@ export const AddStudents = () => {
               </tr>
             ) : (
               students.map((student) => (
-                <tr key={student.id} className="border-t">
+                <tr key={student._id} className="border-t">
                   <td className="p-3">{student.name}</td>
                   <td className="p-3">{student.roll}</td>
-                  <td className="p-3">{student.className}</td>
+                  <td className="p-3">{student.std}</td>
                   <td className="p-3 flex gap-3">
                     <button
                       onClick={() => handleEdit(student)}
@@ -135,7 +142,7 @@ export const AddStudents = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(student.id)}
+                      onClick={() => handleDelete(student._id)}
                       className="text-red-600 hover:underline cursor-pointer"
                     >
                       Delete
