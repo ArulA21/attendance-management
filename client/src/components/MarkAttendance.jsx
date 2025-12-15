@@ -92,7 +92,7 @@ export const MarkAttendance = () => {
   if (!token) return null;
 
   return (
-    <div className="overflow-x-auto w-[900px]">
+    <div className="overflow-x-auto">
       <div className="flex items-center gap-4 mb-4">
         <input
           type="month"
@@ -112,7 +112,7 @@ export const MarkAttendance = () => {
       <table className="border-collapse min-w-max">
         <thead>
           <tr>
-            <th className="border p-2 sticky left-0 bg-white">Student</th>
+            <th className="sticky left-0 bg-white">Name</th>
             {days.map((d) => (
               <th key={d} className="border p-2">
                 {d}
@@ -124,7 +124,7 @@ export const MarkAttendance = () => {
         <tbody>
           {students.map((student) => (
             <tr key={student._id}>
-              <td className="border p-2 sticky left-0 bg-white">
+              <td className="p-2 sticky left-0 bg-white">
                 {student.name}
               </td>
 

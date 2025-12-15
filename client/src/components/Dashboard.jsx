@@ -12,10 +12,12 @@ export const Dashboard = () => {
     <div>
       <Header />
 
-      <div className="flex">
-        <Sidebar active={active} setActive={setActive} />
+      <div className="flex w-full">
+        <div className='w-[15%]'>
+          <Sidebar active={active} setActive={setActive} />
+        </div>
 
-        <div className="flex-1 p-6">
+        <div className="p-6 w-[85%]">
           {active === 'add' && <AddStudents />}
           {active === 'attendance' && <MarkAttendance />}
           {active === 'analytics' && <Analytics />}

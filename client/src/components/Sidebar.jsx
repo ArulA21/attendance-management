@@ -8,7 +8,7 @@ export const Sidebar = ({ active, setActive }) => {
        : 'hover:bg-gray-100'}`;
 
   return (
-    <div className="w-[300px] border-r min-h-screen pt-5">
+    <div className="border-r min-h-screen pt-5">
       <div onClick={() => setActive('add')} className={itemClass('add')}>
         Students
       </div>
